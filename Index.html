@@ -2,24 +2,176 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Farmer Procurement Portal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="styles.css" />
+  <title>AgriProcure - Procurement & Queue Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <header>
-    <h1>Farmer Procurement Portal</h1>
-    <p>MSP Slot Booking & Status Tracking</p>
+<body class="bg-gray-100 font-sans text-gray-800">
+
+  <header class="bg-green-700 text-white p-4 shadow-md">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold flex items-center gap-2">🌾 AgriProcure Hub</h1>
+      <span class="bg-green-800 text-xs px-3 py-1 rounded-full uppercase tracking-wider font-semibold">Center #104 - North Hub</span>
+    </div>
   </header>
 
-  <main id="app">
-    <!-- Content will be injected by JS based on current "screen" -->
+  <main class="max-w-6xl mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <section class="lg:col-span-1 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+      <h2 class="text-xl font-bold text-gray-900 mb-4 pb-2 border-b">1. Farmer Slot Booking</h2>
+
+      <form id="bookingForm" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Full Name</label>
+          <input type="text" id="farmerName" required placeholder="e.g. Ramesh Kumar"
+            class="w-full p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-green-500 outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Mobile Number (SMS Alerts)</label>
+          <input type="tel" id="farmerPhone" required placeholder="9876543210" pattern="[0-9]{10}"
+            class="w-full p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-green-500 outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Crop & Estimated Quantity (Tons)</label>
+          <div class="grid grid-cols-2 gap-2">
+            <select id="cropType" class="p-2.5 border rounded-lg text-sm bg-white">
+              <option>Wheat</option>
+              <option>Rice</option>
+              <option>Maize</option>
+            </select>
+            <input type="number" id="quantity" required placeholder="Tons" min="1" max="50"
+              class="p-2.5 border rounded-lg text-sm">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Preferred Time Slot</label>
+          <select id="timeSlot" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+            <option value="08:00 AM - 10:00 AM">08:00 AM - 10:00 AM (4 slots left)</option>
+            <option value="10:00 AM - 12:00 PM">10:00 AM - 12:00 PM (1 slot left)</option>
+            <option value="01:00 PM - 03:00 PM">01:00 PM - 03:00 PM (8 slots left)</option>
+          </select>
+        </div>
+
+        <button type="submit"
+          class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg text-sm transition shadow">
+          Book Arrival Slot
+        </button>
+      </form>
+
+      <div class="mt-6 p-4 bg-gray-900 text-green-400 rounded-lg text-xs font-mono">
+        <p class="text-gray-400 border-b border-gray-700 pb-1 mb-2">📱 System Notification Service (Simulated SMS)</p>
+        <div id="smsLog">Awaiting dynamic bookings...</div>
+      </div>
+    </section>
+
+    <section class="lg:col-span-2 space-y-6">
+
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <div class="flex justify-between items-center mb-4 pb-2 border-b">
+          <h2 class="text-xl font-bold text-gray-900">2. Live Center Queue Board</h2>
+          <span class="text-xs font-semibold bg-blue-100 text-blue-800 px-2.5 py-1 rounded">Real-Time Sync</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div class="p-4 bg-amber-50 border border-amber-200 rounded-lg text-center">
+            <p class="text-xs uppercase font-bold text-amber-700">Currently Servicing</p>
+            <p id="currentToken" class="text-3xl font-extrabold text-amber-900 mt-1">TK-101</p>
+          </div>
+          <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg text-center">
+            <p class="text-xs uppercase font-bold text-blue-700">Next In Line</p>
+            <p id="nextToken" class="text-3xl font-extrabold text-blue-900 mt-1">TK-102</p>
+          </div>
+          <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center">
+            <p class="text-xs uppercase font-bold text-gray-600">Avg. Wait Time</p>
+            <p class="text-3xl font-extrabold text-gray-800 mt-1">~15 mins</p>
+          </div>
+        </div>
+
+        <div class="flex gap-2 mb-4">
+          <button onclick="advanceQueue()"
+            class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded">
+            Call Next Token (Manager Panel)
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <h2 class="text-xl font-bold text-gray-900 mb-4 pb-2 border-b">3. Procurement & Payment Status Tracking</h2>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-gray-50 text-xs uppercase text-gray-500 border-b">
+              <tr>
+                <th class="p-3">Token</th>
+                <th class="p-3">Farmer</th>
+                <th class="p-3">Crop / Qty</th>
+                <th class="p-3">Queue Status</th>
+                <th class="p-3">Payment State</th>
+              </tr>
+            </thead>
+            <tbody id="queueTable" class="divide-y divide-gray-100">
+              <tr>
+                <td class="p-3 font-mono font-bold">TK-101</td>
+                <td class="p-3">Suresh Patel</td>
+                <td class="p-3">Wheat (10T)</td>
+                <td class="p-3"><span class="bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded-full font-semibold">Unloading</span></td>
+                <td class="p-3"><span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-0.5 rounded-full font-semibold">Verifying Quality</span></td>
+              </tr>
+              <tr>
+                <td class="p-3 font-mono font-bold">TK-102</td>
+                <td class="p-3">Harpreet Singh</td>
+                <td class="p-3">Rice (15T)</td>
+                <td class="p-3"><span class="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full font-semibold">Waiting Gate Pass</span></td>
+                <td class="p-3"><span class="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full font-semibold">Pending Weighment</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
   </main>
 
-  <footer>
-    <p>Demo Farmer Portal – Built for Juned Khan</p>
-  </footer>
+  <script>
+    let tokenCounter = 103;
 
-  <script src="app.js"></script>
+    document.getElementById('bookingForm').addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      const name = document.getElementById('farmerName').value.trim();
+      const phone = document.getElementById('farmerPhone').value.trim();
+      const crop = document.getElementById('cropType').value;
+      const qty = document.getElementById('quantity').value.trim();
+      const slot = document.getElementById('timeSlot').value;
+
+      const token = `TK-${tokenCounter++}`;
+
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td class="p-3 font-mono font-bold">${token}</td>
+        <td class="p-3">${name}</td>
+        <td class="p-3">${crop} (${qty}T)</td>
+        <td class="p-3"><span class="bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded-full font-semibold">Scheduled (${slot.split(' ')[0]})</span></td>
+        <td class="p-3"><span class="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full font-semibold">Approved / Awaiting Gate</span></td>
+      `;
+      document.getElementById('queueTable').appendChild(row);
+
+      document.getElementById('smsLog').textContent =
+        `[SENT to +91-${phone}]: Hello ${name}, slot confirmed for ${crop} at ${slot}. Your Queue Token is ${token}. Show this at Gate 1.`;
+
+      document.getElementById('bookingForm').reset();
+    });
+
+    function advanceQueue() {
+      const currentEl = document.getElementById('currentToken');
+      const nextEl = document.getElementById('nextToken');
+
+      const currentNum = parseInt(currentEl.innerText.replace('TK-', ''), 10);
+      currentEl.innerText = `TK-${currentNum + 1}`;
+      nextEl.innerText = `TK-${currentNum + 2}`;
+    }
+  </script>
 </body>
 </html>
